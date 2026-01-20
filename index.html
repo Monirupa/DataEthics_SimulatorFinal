@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Ethics Simulator - GDPR, DPDP & EU AI Act</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-medium: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #475569;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape1 { 
+            width: 300px; 
+            height: 300px; 
+            background: var(--primary); 
+            top: 10%; 
+            left: 10%;
+        }
+        .shape2 { 
+            width: 400px; 
+            height: 400px; 
+            background: var(--secondary); 
+            top: 60%; 
+            right: 10%;
+            animation-delay: 5s;
+        }
+        .shape3 { 
+            width: 250px; 
+            height: 250px; 
+            background: var(--accent); 
+            bottom: 10%; 
+            left: 50%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(50px, -50px) scale(1.1); }
+            50% { transform: translate(-30px, 30px) scale(0.9); }
+            75% { transform: translate(40px, 20px) scale(1.05); }
+        }
+
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        nav {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: var(--text-primary);
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #60a5fa, #34d399, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .role-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+        }
+
+        .role-card.selected {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .role-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: var(--success);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            background: rgba(30, 41, 59, 0.9);
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 2px solid var(--border);
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option {
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: var(--primary);
+            transform: translateX(10px);
+        }
+
+        .option.selected {
+            background: rgba(37, 99, 235, 0.3);
+            border-color: var(--primary);
+        }
+
+        .option.correct {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: var(--success);
+        }
+
+        .option.incorrect {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: var(--danger);
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .explanation {
+            background: rgba(6, 182, 212, 0.2);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            border-left: 4px solid var(--secondary);
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+
+        .leaderboard-table th {
+            background: rgba(37, 99, 235, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        .leaderboard-table td {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 1rem;
+        }
+
+        .leaderboard-table tr:hover td {
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .rank-badge {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #000; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #000; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #ffb347); color: #000; }
+
+        .score-display {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-radius: 16px;
+            margin: 2rem 0;
+        }
+
+        .score-number {
+            font-size: 5rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+
+        .category-pill {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .gdpr { background: rgba(37, 99, 235, 0.3); }
+        .dpdp { background: rgba(16, 185, 129, 0.3); }
+        .euai { background: rgba(245, 158, 11, 0.3); }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .accordion {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .accordion-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            transition: background 0.3s ease;
+        }
+
+        .accordion-header:hover {
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.active {
+            max-height: 2000px;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .grid-3 { grid-template-columns: 1fr; }
+            nav { gap: 0.5rem; }
+            .score-number { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation">
+        <div class="floating-shape shape1"></div>
+        <div class="floating-shape shape2"></div>
+        <div class="floating-shape shape3"></div>
+    </div>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">⚖️ DataEthics Pro</div>
+            <nav>
+                <button class="nav-btn active" onclick="showPage('home')">Home</button>
+                <button class="nav-btn" onclick="showPage('simulator')">Simulator</button>
+                <button class="nav-btn" onclick="showPage('leaderboard')">Leaderboard</button>
+                <button class="nav-btn" onclick="showPage('howto')">How To</button>
+                <button class="nav-btn" onclick="showPage('library')">Library</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- HOME PAGE -->
+        <div id="home" class="page active">
+            <div class="hero">
+                <h1>Master Data Ethics & Compliance</h1>
+                <p>Interactive simulator for GDPR, DPDP Act, and EU AI Act compliance across multiple industries</p>
+                <button class="btn btn-primary" onclick="showPage('simulator')">Start Simulator →</button>
+            </div>
+
+            <div class="grid-3">
+                <div class="card">
+                    <div style="text-align: center; font-size: 4rem; margin-bottom: 1rem;">📋</div>
+                    <h3 style="margin-bottom: 1rem;">GDPR Compliance</h3>
+                    <p>Master the General Data Protection Regulation with role-specific scenarios</p>
+                </div>
+                <div class="card">
+                    <div style="text-align: center; font-size: 4rem; margin-bottom: 1rem;">🇮🇳</div>
+                    <h3 style="margin-bottom: 1rem;">DPDP Act</h3>
+                    <p>Navigate India's Digital Personal Data Protection Act</p>
+                </div>
+                <div class="card">
+                    <div style="text-align: center; font-size: 4rem; margin-bottom: 1rem;">🤖</div>
+                    <h3 style="margin-bottom: 1rem;">EU AI Act</h3>
+                    <p>Understand AI ethics and compliance requirements</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIMULATOR PAGE -->
+        <div id="simulator" class="page">
+            <div id="registration-form">
+                <div class="card">
+                    <h2 style="margin-bottom: 2rem;">Register to Start</h2>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="userName" placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="userEmail" placeholder="your.email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Select Your Role/Industry</label>
+                        <div class="grid-3" style="margin-top: 1rem;">
+                            <div class="role-card" data-role="developer" onclick="selectRole('developer')">
+                                <div class="role-icon">💻</div>
+                                <h3>Developer</h3>
+                                <p>Software & Tech</p>
+                            </div>
+                            <div class="role-card" data-role="financial" onclick="selectRole('financial')">
+                                <div class="role-icon">💰</div>
+                                <h3>Financial</h3>
+                                <p>Banking & Finance</p>
+                            </div>
+                            <div class="role-card" data-role="healthcare" onclick="selectRole('healthcare')">
+                                <div class="role-icon">🏥</div>
+                                <h3>Healthcare</h3>
+                                <p>Medical & Health</p>
+                            </div>
+                            <div class="role-card" data-role="construction" onclick="selectRole('construction')">
+                                <div class="role-icon">🏗️</div>
+                                <h3>Construction</h3>
+                                <p>Building & Infrastructure</p>
+                            </div>
+                        </div>
+                        <input type="hidden" id="userRole">
+                    </div>
+                    <button class="btn btn-primary" onclick="startQuiz()" style="margin-top: 2rem; width: 100%;">Start Quiz →</button>
+                </div>
+            </div>
+
+            <div id="quiz-container" class="hidden">
+                <div class="quiz-header">
+                    <h2 id="quizTitle">Data Ethics Quiz</h2>
+                    <div style="margin-top: 1rem;">
+                        <span class="category-pill gdpr">GDPR</span>
+                        <span class="category-pill dpdp">DPDP Act</span>
+                        <span class="category-pill euai">EU AI Act</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressBar"></div>
+                    </div>
+                    <p style="margin-top: 1rem;">
+                        Question <span id="currentQuestion">1</span> of <span id="totalQuestions">15</span>
+                    </p>
+                </div>
+
+                <div class="question-card">
+                    <div style="margin-bottom: 1rem;">
+                        <span class="category-pill" id="questionCategory"></span>
+                    </div>
+                    <div class="question-text" id="questionText"></div>
+                    <div class="options" id="optionsContainer"></div>
+                    <div class="explanation" id="explanation"></div>
+                    <button class="btn btn-primary hidden" id="nextBtn" onclick="nextQuestion()" style="margin-top: 2rem;">Next Question →</button>
+                </div>
+            </div>
+
+            <div id="results-container" class="hidden">
+                <div class="score-display">
+                    <h2>Quiz Complete! 🎉</h2>
+                    <div class="score-number" id="finalScore">0/15</div>
+                    <p style="font-size: 1.3rem;" id="scorePercentage">0%</p>
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="location.reload()">Take Another Quiz</button>
+                    <button class="btn btn-primary" onclick="showPage('leaderboard')" style="margin-left: 1rem;">View Leaderboard</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD PAGE -->
+        <div id="leaderboard" class="page">
+            <h1 style="margin-bottom: 2rem;">🏆 Leaderboard</h1>
+            <div class="card">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <tr><td colspan="6" style="text-align: center;">No entries yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HOW TO PAGE -->
+        <div id="howto" class="page">
+            <h1>📖 How to Use</h1>
+            <div class="card" style="margin-top: 2rem;">
+                <h2>Getting Started</h2>
+                <ol style="margin-top: 1rem; line-height: 2;">
+                    <li>Register with your name, email, and select your industry role</li>
+                    <li>Answer 15 questions covering GDPR, DPDP, and EU AI Act</li>
+                    <li>Get instant feedback with detailed explanations</li>
+                    <li>View your score and ranking on the leaderboard</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- LIBRARY PAGE -->
+        <div id="library" class="page">
+            <h1>📚 Knowledge Library</h1>
+            
+            <div style="margin-top: 2rem;">
+                <h2>GDPR Resources</h2>
+                <div class="accordion" style="margin-top: 1rem;">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Key Principles</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <ul style="line-height: 2;">
+                            <li>Lawfulness, Fairness, Transparency</li>
+                            <li>Purpose Limitation</li>
+                            <li>Data Minimization</li>
+                            <li>Accuracy</li>
+                            <li>Storage Limitation</li>
+                            <li>Integrity and Confidentiality</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Question bank with all categories
+        const allQuestions = [
+            // GDPR Developer Questions
+            { category: 'gdpr', role: 'developer', question: 'You\'re developing a mobile app that collects user location data. Under GDPR, what is the minimum requirement before collecting this data?', options: ['Display a privacy policy somewhere in the app', 'Obtain explicit, informed consent with clear purpose explanation', 'Send an email notification to users', 'Include it in the terms of service'], correct: 1, explanation: 'GDPR requires explicit, informed consent for processing personal data like location. Users must actively agree after being clearly informed about what data is collected, why, and how it will be used.' },
+            
+            { category: 'gdpr', role: 'developer', question: 'Your application suffered a data breach exposing 5,000 users\' email addresses and passwords. What is your GDPR obligation?', options: ['Fix the vulnerability and move on', 'Notify users within 30 days', 'Report to supervisory authority within 72 hours and notify affected users', 'Only report if financial data was exposed'], correct: 2, explanation: 'GDPR Article 33 requires notification to the supervisory authority within 72 hours. Article 34 requires direct notification to affected individuals when the breach poses high risk.' },
+            
+            { category: 'gdpr', role: 'financial', question: 'A customer requests a copy of all their personal data your bank holds. You have 30 days of transactions plus 7 years of archives. What must you provide?', options: ['Only recent transaction history', 'All personal data including archived records, in accessible format', 'Summary statement only', 'Data from last 12 months'], correct: 1, explanation: 'GDPR Article 15 requires organizations to provide all personal data being processed, regardless of age or storage location. This includes archived data in a machine-readable format.' },
+            
+            { category: 'gdpr', role: 'healthcare', question: 'A patient\'s medical records are requested by their new healthcare provider. Under GDPR, what\'s required?', options: ['Patient consent every time', 'Verify identity, confirm patient authorization, and ensure secure transfer', 'Automatic sharing between healthcare providers', 'Court order required'], correct: 1, explanation: 'Article 9 regulates special category data (health data). Transfer requires explicit consent or legal basis. You must verify identity, confirm authorization, and use secure transfer methods.' },
+            
+            { category: 'gdpr', role: 'construction', question: 'You\'re using facial recognition for construction site access control. What GDPR category is this data?', options: ['Regular personal data', 'Special category (biometric) data requiring explicit consent', 'Security data with no restrictions', 'Employment data covered by contracts'], correct: 1, explanation: 'Article 9 classifies biometric data for unique identification as special category data requiring explicit consent or another Article 9(2) exception.' },
+            
+            // DPDP Questions
+            { category: 'dpdp', role: 'developer', question: 'Under the DPDP Act, what is the consent manager\'s role?', options: ['Optional for small businesses', 'Facilitate obtaining, managing, and reviewing consent on behalf of Data Principals', 'Replace the need for consent', 'Only store consent records'], correct: 1, explanation: 'The DPDP Act introduces Consent Managers to help Data Principals give, manage, review, and withdraw consent, acting as intermediaries.' },
+            
+            { category: 'dpdp', role: 'financial', question: 'A fintech app wants to process user financial data for credit scoring. What is the valid lawful basis under DPDP?', options: ['Legitimate interest of the company', 'Valid consent obtained clearly and specifically for credit scoring', 'Implied consent from app usage', 'No consent needed for financial services'], correct: 1, explanation: 'DPDP Act follows a consent-first approach. Consent must be free, specific, informed, unconditional, and unambiguous for credit scoring.' },
+            
+            { category: 'dpdp', role: 'healthcare', question: 'Under DPDP, what age threshold defines a "child" requiring parental consent?', options: ['16 years', '18 years', 'To be notified by Central Government', '21 years'], correct: 2, explanation: 'The DPDP Act delegates the definition of "child" to the Central Government. Processing children\'s data requires verifiable parental consent.' },
+            
+            { category: 'dpdp', role: 'construction', question: 'A construction company transfers worker data to a cloud provider in the US. What does DPDP require?', options: ['No restrictions for business purposes', 'Notify Data Protection Board and ensure adequate safeguards', 'Automatic approval for cloud services', 'Only encryption is needed'], correct: 1, explanation: 'DPDP requires notification to the Data Protection Board for cross-border transfers and ensuring the receiving country has adequate data protection.' },
+            
+            { category: 'dpdp', role: 'developer', question: 'What is the maximum penalty under DPDP Act for significant violations?', options: ['₹50 crores', '₹100 crores', '₹250 crores', '₹500 crores'], correct: 2, explanation: 'The DPDP Act provides for penalties up to ₹250 crores for significant data protection violations by Data Fiduciaries.' },
+            
+            // EU AI Act Questions
+            { category: 'euai', role: 'developer', question: 'You\'re developing an AI system for automated loan approval in a bank. Under the EU AI Act, what risk category does this fall under?', options: ['Minimal risk', 'Limited risk', 'High risk requiring strict compliance', 'Unacceptable risk - prohibited'], correct: 2, explanation: 'AI systems used in credit scoring and loan decisions are classified as high-risk under the EU AI Act as they have significant impact on individuals\' access to financial services.' },
+            
+            { category: 'euai', role: 'healthcare', question: 'An AI diagnostic tool assists radiologists in detecting cancer. What EU AI Act requirements apply?', options: ['No requirements - medical devices are exempt', 'High-risk requirements: risk management, documentation, human oversight', 'Only CE marking needed', 'Limited transparency obligations only'], correct: 1, explanation: 'Medical AI systems are high-risk, requiring comprehensive risk management, technical documentation, record-keeping, and human oversight provisions.' },
+            
+            { category: 'euai', role: 'financial', question: 'Your chatbot handles customer service inquiries. What transparency obligation exists under EU AI Act?', options: ['No obligation for simple chatbots', 'Disclose that users are interacting with an AI system', 'Only disclose if specifically asked', 'Disclosure only in privacy policy'], correct: 1, explanation: 'The EU AI Act requires transparency for AI systems interacting with humans. Users must be informed they are interacting with AI unless it\'s obvious from context.' },
+            
+            { category: 'euai', role: 'construction', question: 'AI-powered equipment monitors worker fatigue and alerts supervisors. What EU AI Act category is this?', options: ['Minimal risk', 'High risk - monitoring workers', 'Unacceptable risk - prohibited', 'Limited risk with transparency'], correct: 1, explanation: 'AI systems for employment management and worker monitoring are classified as high-risk, requiring compliance with strict requirements including human oversight.' },
+            
+            { category: 'euai', role: 'developer', question: 'Which AI system is explicitly prohibited under the EU AI Act?', options: ['Medical diagnostic AI', 'Social scoring by governments', 'Customer service chatbots', 'Recommendation algorithms'], correct: 1, explanation: 'The EU AI Act prohibits AI systems for social scoring by public authorities as they pose unacceptable risks to fundamental rights and freedoms.' }
+        ];
+
+        // Application state
+        let currentUser = null;
+        let currentQuiz = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let selectedRole = null;
+
+        // Initialize leaderboard from localStorage
+        let leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(pageName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (pageName === 'leaderboard') {
+                updateLeaderboard();
+            }
+        }
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-role="${role}"]`).classList.add('selected');
+            document.getElementById('userRole').value = role;
+        }
+
+        function startQuiz() {
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const role = selectedRole;
+
+            if (!name || !email || !role) {
+                alert('Please fill in all fields and select a role');
+                return;
+            }
+
+            currentUser = { name, email, role, timestamp: new Date().toISOString() };
+            
+            // Generate quiz with 5 questions from each category, filtered by role
+            const gdprQuestions = allQuestions.filter(q => q.category === 'gdpr' && q.role === role).slice(0, 5);
+            const dpdpQuestions = allQuestions.filter(q => q.category === 'dpdp').slice(0, 5);
+            const euaiQuestions = allQuestions.filter(q => q.category === 'euai').slice(0, 5);
+            
+            currentQuiz = [...gdprQuestions, ...dpdpQuestions, ...euaiQuestions];
+            
+            // Shuffle questions
+            currentQuiz.sort(() => Math.random() - 0.5);
+            
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            
+            document.getElementById('registration-form').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            document.getElementById('totalQuestions').textContent = currentQuiz.length;
+            
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = currentQuiz[currentQuestionIndex];
+            const progress = ((currentQuestionIndex + 1) / currentQuiz.length) * 100;
+            
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('questionText').textContent = question.question;
+            
+            const categoryClass = question.category;
+            const categoryText = question.category === 'gdpr' ? 'GDPR' : 
+                                 question.category === 'dpdp' ? 'DPDP Act' : 'EU AI Act';
+            document.getElementById('questionCategory').className = `category-pill ${categoryClass}`;
+            document.getElementById('questionCategory').textContent = categoryText;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            document.getElementById('explanation').classList.remove('show');
+            document.getElementById('nextBtn').classList.add('hidden');
+        }
+
+        function selectOption(selectedIndex) {
+            const question = currentQuiz[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(opt => {
+                opt.classList.add('disabled');
+                opt.onclick = null;
+            });
+            
+            // Mark selected answer
+            options[selectedIndex].classList.add('selected');
+            
+            // Show correct/incorrect
+            options[question.correct].classList.add('correct');
+            if (selectedIndex !== question.correct) {
+                options[selectedIndex].classList.add('incorrect');
+            }
+            
+            // Store answer
+            userAnswers.push({
+                question: question.question,
+                category: question.category,
+                selectedAnswer: selectedIndex,
+                correctAnswer: question.correct,
+                isCorrect: selectedIndex === question.correct
+            });
+            
+            // Show explanation
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `<strong>Explanation:</strong> ${question.explanation}`;
+            explanationDiv.classList.add('show');
+            
+            // Show next button
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < currentQuiz.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            const correctAnswers = userAnswers.filter(a => a.isCorrect).length;
+            const percentage = Math.round((correctAnswers / currentQuiz.length) * 100);
+            
+            // Save to leaderboard
+            const entry = {
+                ...currentUser,
+                score: correctAnswers,
+                total: currentQuiz.length,
+                percentage: percentage,
+                date: new Date().toLocaleDateString()
+            };
+            
+            leaderboard.push(entry);
+            leaderboard.sort((a, b) => b.percentage - a.percentage || b.score - a.score);
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            
+            // Display results
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('results-container').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = `${correctAnswers}/${currentQuiz.length}`;
+            document.getElementById('scorePercentage').textContent = `${percentage}% Correct`;
+        }
+
+        function updateLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            
+            if (leaderboard.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No entries yet</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = leaderboard.map((entry, index) => {
+                const rankBadge = index < 3 ? `<span class="rank-badge rank-${index + 1}">${index + 1}</span>` : index + 1;
+                return `
+                    <tr>
+                        <td>${rankBadge}</td>
+                        <td>${entry.name}</td>
+                        <td>${entry.role.charAt(0).toUpperCase() + entry.role.slice(1)}</td>
+                        <td>${entry.score}/${entry.total}</td>
+                        <td>${entry.percentage}%</td>
+                        <td>${entry.date}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const isActive = content.classList.contains('active');
+            
+            document.querySelectorAll('.accordion-content').forEach(c => c.classList.remove('active'));
+            
+            if (!isActive) {
+                content.classList.add('active');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLeaderboard();
+        });
+    </script>
+</body>
+</html>
